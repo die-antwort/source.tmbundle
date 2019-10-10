@@ -13,14 +13,14 @@ TAB_SIZE     = (ENV['TM_TAB_SIZE'] || '2').to_i
 lines        = STDIN.readlines
 
 # List of operators that determine if a line is or is not an assignment
-INCLUDE_OPS = %w( -= += /= //= %= *= **= ^= |= &amp;= ||= &amp;&amp;= &lt;&lt;= &gt;&gt;= &gt;&gt;&gt;= .= x= := ::= =&gt; = )
+INCLUDE_OPS = %w( -= += /= //= %= *= **= ^= |= &amp;= ||= &amp;&amp;= &lt;&lt;= &gt;&gt;= &gt;&gt;&gt;= .= x= := ::= =&gt; = &lt;- )
 EXCLUDE_OPS = %w( &lt;= &gt;= &lt;=&gt; == === != =~ )
 
 INCLUDE = Regexp.new(INCLUDE_OPS.map { |op| Regexp.escape(op) }.join('|'))
 EXCLUDE = Regexp.new(EXCLUDE_OPS.map { |op| Regexp.escape(op) }.join('|'))
 
 # Use look-behind to have padding inserted *after* the (colon) operator
-FALLBACK_INCLUDE = /(?&lt;=\S:\s)/
+FALLBACK_INCLUDE = /(?&lt;=\S:[\t ])/
 
 class AlignHelper
   def self.try(lines, include, exclude, first)
@@ -61,7 +61,7 @@ class AlignHelper
     left_width += 1 if op_width &gt; 0
 
     lines = partitioned.map do |left, op, right|
-      left.rstrip.ljust(left_width) + op.rjust(op_width) + ' ' + right.lstrip
+      left.rstrip.ljust(left_width) + op.rjust(op_width) + ' ' + right.gsub(/^[\t ]+/, '')
     end
 
     res = @lines.dup
